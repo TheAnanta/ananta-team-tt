@@ -139,13 +139,22 @@
 
         .day-column {
             font-weight: 700;
-            background-color: var(--md-sys-color-surface);
-            color: var(--md-sys-color-on-surface);
             width: 110px;
             position: sticky;
             left: 0;
             z-index: 2;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+        }
+
+        th.day-column {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            z-index: 3;
+        }
+
+        td.day-column {
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
         }
 
         /* Schedule Cell Layout */
