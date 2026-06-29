@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Team Timetable</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Material 3 Expressive Design Tokens & Systems */
+        :root {
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-surface: #FEF7FF;
+            --md-sys-color-on-surface: #1D1B20;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-background: #F3EDF7;
+
+            /* Avatar Personalized Accent Tokens */
+            --color-chaitu: #006A6A;
+            --color-chaitu-container: #CCEBCB;
+            --color-gagana: #984061;
+            --color-gagana-container: #FFD9E2;
+            --color-harshini: #685400;
+            --color-harshini-container: #FFE086;
+
+            --font-family: 'Product Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-surface);
+            padding: 32px 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        header {
+            margin-bottom: 24px;
+            padding-left: 8px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--md-sys-color-on-surface);
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        /* Material 3 Legend Chips */
+        .legend {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .legend-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px 6px 6px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .legend-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* Responsive Expressive Table Container */
+        .table-card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 16px;
+            box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
+            overflow: hidden;
+            border: 1px solid var(--md-sys-color-surface-variant);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 1100px;
+        }
+
+        th,
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--md-sys-color-surface-variant);
+            border-right: 1px solid var(--md-sys-color-surface-variant);
+        }
+
+        th:last-child,
+        td:last-child {
+            border-right: none;
+        }
+
+        th {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            font-weight: 500;
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+
+        .day-column {
+            font-weight: 700;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            width: 110px;
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Schedule Cell Layout */
+        .slot-cell {
+            height: 80px;
+            vertical-align: middle;
+        }
+
+        .avatar-group {
+            display: flex;
+            gap: 6px;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+
+        /* Material 3 Interactive Avatar Base */
+        .avatar,
+        .legend-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease;
+        }
+
+        .legend-avatar {
+            width: 24px;
+            height: 24px;
+            font-size: 0.75rem;
+        }
+
+        .avatar span,
+        .legend-avatar span {
+            position: absolute;
+            z-index: 1;
+        }
+
+        .avatar img,
+        .legend-avatar img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 2;
+            border-radius: 50%;
+            display: block;
+        }
+
+        .avatar:hover {
+            transform: scale(1.15);
+            z-index: 10;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Specific Variant Color Mapping */
+        .avatar.chaitu,
+        .legend-avatar.chaitu {
+            background-color: var(--color-chaitu-container);
+            color: var(--color-chaitu);
+        }
+
+        .avatar.gagana,
+        .legend-avatar.gagana {
+            background-color: var(--color-gagana-container);
+            color: var(--color-gagana);
+        }
+
+        .avatar.harshini,
+        .legend-avatar.harshini {
+            background-color: var(--color-harshini-container);
+            color: var(--color-harshini);
+        }
+
+        /* Material 3 Rich Tooltip Styles */
+        .avatar[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.85);
+            background-color: var(--md-sys-color-on-primary-container);
+            color: var(--md-sys-color-primary-container);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 400;
+            line-height: 1.4;
+            white-space: pre;
+            text-align: left;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s cubic-bezier(0.2, 0, 0, 1), transform 0.15s cubic-bezier(0.2, 0, 0, 1);
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        /* Positioning adjustment helper for right-side columns to prevent viewport clipping */
+        .slot-cell:nth-last-child(-n+3) .avatar[data-tooltip]::after {
+            left: auto;
+            right: 0;
+            transform: translateX(0) scale(0.85);
+        }
+
+        .avatar:hover[data-tooltip]::after {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .slot-cell:nth-last-child(-n+3) .avatar:hover[data-tooltip]::after {
+            transform: translateX(0) scale(1);
+        }
+
+        /* Tooltips on the first row (Monday) of the table go downwards to prevent top clipping */
+        tbody tr:first-child .avatar[data-tooltip]::after {
+            bottom: auto;
+            top: 130%;
+            transform: translateX(-50%) scale(0.85);
+        }
+        tbody tr:first-child .avatar:hover[data-tooltip]::after {
+            transform: translateX(-50%) scale(1);
+        }
+        tbody tr:first-child .slot-cell:nth-last-child(-n+3) .avatar[data-tooltip]::after {
+            left: auto;
+            right: 0;
+            transform: translateX(0) scale(0.85);
+        }
+        tbody tr:first-child .slot-cell:nth-last-child(-n+3) .avatar:hover[data-tooltip]::after {
+            transform: translateX(0) scale(1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <img src="https://theananta.in/logomark.svg" style="width: 40px;margin-bottom: 16px;" />
+            <!-- <img src="https://theananta.in/logo_gellix.svg" /> -->
+            <h1>Team's Timetable</h1>
+            <div class="legend">
+                <div class="legend-chip">
+                    <div class="legend-avatar chaitu"><span>C</span><img
+                            src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" />
+                    </div>
+                    <span>Chaitu (B.Tech - CSE)</span>
+                </div>
+                <div class="legend-chip">
+                    <div class="legend-avatar gagana"><span>G</span><img
+                            src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" />
+                    </div>
+                    <span>Gagana (B.Tech - CSE)</span>
+                </div>
+                <div class="legend-chip">
+                    <div class="legend-avatar harshini"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                    <span>Harshini (B.Tech - CSE)</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="table-card">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="day-column">Weekdays</th>
+                            <th>Slot-1<br>(8-9 am)</th>
+                            <th>Slot-2<br>(9-10 am)</th>
+                            <th>Slot-3<br>(10-11 am)</th>
+                            <th>Slot-4<br>(11-12 pm)</th>
+                            <th>Slot-5<br>(12-1 pm)</th>
+                            <th>Slot-6<br>(1-2 pm)</th>
+                            <th>Slot-7<br>(2-3 pm)</th>
+                            <th>Slot-8<br>(3-4 pm)</th>
+                            <th>Slot-9<br>(4-5 pm)</th>
+                            <th>Slot-10<br>(5-6 pm)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td class="day-column">Monday</td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar gagana" data-tooltip=" GCGC1021&#xa;Applied Comm. & Quant. Skills&#xa;Room: 111 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN2001&#xa;Data Structures&#xa;Room: 506 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" GCGC1021&#xa;Applied Comm. & Quant. Skills&#xa;Room: 111 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" MATH2561&#xa;Probability & Statistics&#xa;Room: 207 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2131P&#xa;Web App Frameworks Lab&#xa;Room: 203 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar harshini" data-tooltip=" MECH2311&#xa;Fundamentals of Project Mgmt&#xa;Room: 338 | Bldg:
+                                        ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN2021&#xa;Computer Org & Architecture&#xa;Room: 223 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2131P&#xa;Web App Frameworks Lab&#xa;Room: 203 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar harshini" data-tooltip=" CSEN3251&#xa;Intro to Pattern Rec. & ML&#xa;Room: 231 | Bldg:
+                                        ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar gagana" data-tooltip=" MECH3271&#xa;Total Quality Management&#xa;Room: 228 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell"></td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2041&#xa;Computer Networks&#xa;Room: 224 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar harshini" data-tooltip=" 24CSEN4121&#xa;Building Agent AI Systems&#xa;Room: 218 | Bldg:
+                                        ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell"></td>
+                            <td class="slot-cell"></td>
+                            <td class="slot-cell"></td>
+                        </tr>
+
+                        <tr>
+                            <td class="day-column">Tuesday</td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" GCGC1001&#xa;Aptitude & Self-Mgmt Skills&#xa;Room: 328 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2131&#xa;Web Application Frameworks&#xa;Room: 107 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" GCGC1001&#xa;Aptitude & Self-Mgmt Skills&#xa;Room: 328 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN1021&#xa;Software Engineering&#xa;Room: 323 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN1011&#xa;Object Oriented Programming&#xa;Room: 524 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2111&#xa;Computer Graphics & Multimedia&#xa;Room: 224 |
+                                        Bldg: ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar harshini" data-tooltip=" MECH2311&#xa;Fundamentals of Project Mgmt&#xa;Room: 338 | Bldg:
+                                        ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN2021&#xa;Computer Org & Architecture&#xa;Room: 223 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2041&#xa;Computer Networks&#xa;Room: 224 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar harshini" data-tooltip=" VIVA3555&#xa;Comprehensive Examination&#xa;Room: 620 | Bldg:
+                                        ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar gagana" data-tooltip=" MECH3271&#xa;Total Quality Management&#xa;Room: 228 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell"></td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN2001&#xa;Data Structures&#xa;Room: 506 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar harshini" data-tooltip=" CSEN3251&#xa;Intro to Pattern Rec. & ML&#xa;Room: 231 | Bldg:
+                                        ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2311P&#xa;Machine Learning Lab&#xa;Room: 219 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar harshini" data-tooltip=" 24CSEN4121&#xa;Building Agent AI Systems&#xa;Room: 218 | Bldg:
+                                        ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2311P&#xa;Machine Learning Lab&#xa;Room: 219 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell"></td>
+                        </tr>
+
+                        <tr>
+                            <td class="day-column">Wednesday</td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" MATH2561&#xa;Probability & Statistics&#xa;Room: 207 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN1021P&#xa;Software Engineering Lab&#xa;Room: 209 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN2021&#xa;Computer Org & Architecture&#xa;Room: 223 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN1021P&#xa;Software Engineering Lab&#xa;Room: 209 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN1011&#xa;Object Oriented Programming&#xa;Room: 524 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2111P&#xa;Comp. Graphics & Multi. Lab&#xa;Room: 220 |
+                                        Bldg: ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar harshini" data-tooltip=" MECH2311&#xa;Fundamentals of Project Mgmt&#xa;Room: 338 | Bldg:
+                                        ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN2001&#xa;Data Structures&#xa;Room: 506 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2111P&#xa;Comp. Graphics & Multi. Lab&#xa;Room: 220 |
+                                        Bldg: ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar harshini" data-tooltip=" MECH2301&#xa;Engineering Economics&#xa;Room: 431 | Bldg:
+                                        ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar gagana" data-tooltip=" MECH3271&#xa;Total Quality Management&#xa;Room: 228 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell"></td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" MECH2331&#xa;Intro to Operations Research&#xa;Room: 314 | Bldg:
+                                        CB"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2131&#xa;Web Application Frameworks&#xa;Room: 107 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar harshini" data-tooltip=" CSEN3251&#xa;Intro to Pattern Rec. & ML&#xa;Room: 231 | Bldg:
+                                        ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2111&#xa;Computer Graphics & Multimedia&#xa;Room: 224 |
+                                        Bldg: ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell"></td>
+                            <td class="slot-cell"></td>
+                        </tr>
+
+                        <tr>
+                            <td class="day-column">Thursday</td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN1011&#xa;Object Oriented Programming&#xa;Room: 524 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2041&#xa;Computer Networks&#xa;Room: 224 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" MATH2561&#xa;Probability & Statistics&#xa;Room: 207 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2131&#xa;Web Application Frameworks&#xa;Room: 107 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN2001P&#xa;Data Structures Lab&#xa;Room: 309 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN1021P&#xa;Software Engineering Lab&#xa;Room: 209 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar harshini" data-tooltip=" MECH2301&#xa;Engineering Economics&#xa;Room: 431 | Bldg:
+                                        ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN2001P&#xa;Data Structures Lab&#xa;Room: 309 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN1021P&#xa;Software Engineering Lab&#xa;Room: 209 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2311&#xa;Machine Learning Techniques&#xa;Room: 113 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" MECH2331&#xa;Intro to Operations Research&#xa;Room: 314 | Bldg:
+                                        CB"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar harshini" data-tooltip=" 24CSEN4121P&#xa;Building Agent AI Systems Lab&#xa;Room: 209 |
+                                        Bldg: ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar harshini" data-tooltip=" 24CSEN4121P&#xa;Building Agent AI Systems Lab&#xa;Room: 209 |
+                                        Bldg: ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell"></td>
+                            <td class="slot-cell"></td>
+                        </tr>
+
+                        <tr>
+                            <td class="day-column">Friday</td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN2021&#xa;Computer Org & Architecture&#xa;Room: 223 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2041P&#xa;Computer Networks Lab&#xa;Room: 314 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" MATH2561&#xa;Probability & Statistics&#xa;Room: 207 | Bldg:
+                                        ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2041P&#xa;Computer Networks Lab&#xa;Room: 314 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN1011P&#xa;OOP Lab&#xa;Room: 510 | Bldg: ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN1021&#xa;Software Engineering&#xa;Room: 323 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar harshini" data-tooltip=" MECH2301&#xa;Engineering Economics&#xa;Room: 431 | Bldg:
+                                        ICT"><span>H</span><img src="/Users/manasmalla/Downloads/Timetab/harshini.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" 24CSEN1011P&#xa;OOP Lab&#xa;Room: 510 | Bldg: ICT"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2111&#xa;Computer Graphics & Multimedia&#xa;Room: 224 |
+                                        Bldg: ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar gagana" data-tooltip=" 24CSEN2311&#xa;Machine Learning Techniques&#xa;Room: 113 | Bldg:
+                                        ICT"><span>G</span><img src="/Users/manasmalla/Downloads/Timetab/gagana.png" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell">
+                                <div class="avatar-group">
+                                    <div class="avatar chaitu" data-tooltip=" MECH2331&#xa;Intro to Operations Research&#xa;Room: 314 | Bldg:
+                                        CB"><span>C</span><img src="/Users/manasmalla/Downloads/Timetab/chaitanya_sameer.jpg" onerror="this.style.display='none'" /></div>
+                                </div>
+                            </td>
+                            <td class="slot-cell"></td>
+                            <td class="slot-cell"></td>
+                            <td class="slot-cell"></td>
+                            <td class="slot-cell"></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
